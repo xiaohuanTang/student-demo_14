@@ -6,43 +6,56 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
+
+<div th:replace="fragments/navbar :: navbar"></div>
+
 <div class="container mt-4">
-    <div class="card">
-        <div class="card-header bg-primary text-white">
-            <h3>考勤打卡</h3>
+    <h2>考勤打卡</h2>
+
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+
+    <form th:action="@{/attendance/checkIn}" method="post">
+        <div class="mb-3">
+            <label class="form-label">选择课程：</label>
+            <select class="form-select" name="courseId" required>
+                <option value="">请选择课程</option>
+                <option th:each="course : ${courses}"
+                        th:value="${course.id}"
+                        th:text="${course.courseName} + ' - ' + ${course.className}">
+                </option>
+            </select>
         </div>
-        <div class="card-body">
-            <div th:if="${param.error}" class="alert alert-danger">
-                <span th:if="${param.error[0] == 'notInTime'}">不在打卡时间范围内！只能在课程开始前15分钟至开始后30分钟内打卡。</span>
-                <span th:if="${param.error[0] == 'notFound'}">学生或课程不存在！</span>
-            </div>
 
-            <div th:if="${param.success}" class="alert alert-success">
-                打卡成功！
-            </div>
-
-            <form th:action="@{/attendance/checkIn}" method="post">
-                <div class="mb-3">
-                    <label class="form-label">选择课程：</label>
-                    <select class="form-select" name="courseId" required>
-                        <option value="">请选择课程</option>
-                        <option th:each="course : ${courses}"
-                                th:value="${course.id}"
-                                th:text="${course.courseName} + ' (' + ${course.className} + ')'">
-                        </option>
-                    </select>
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label">备注：</label>
-                    <textarea class="form-control" name="remark" rows="3" placeholder="可选，填写备注信息"></textarea>
-                </div>
-
-                <button type="submit" class="btn btn-primary">提交打卡</button>
-                <a href="/attendance/list" class="btn btn-secondary">查看我的记录</a>
-            </form>
+        <div class="mb-3">
+            <label class="form-label">打卡时间：</label>
+            <input type="text" class="form-control"
+                   th:value="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd HH:mm:ss')}"
+                   readonly disabled>
         </div>
-    </div>
+
+        <div class="mb-3">
+            <label class="form-label">座位号：</label>
+            <div class="row">
+                <div class="col">
+                    <input type="number" class="form-control" name="seatRow" placeholder="行号" min="1" max="20">
+                </div>
+                <div class="col">
+                    <input type="number" class="form-control" name="seatCol" placeholder="列号" min="1" max="20">
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">备注：</label>
+            <textarea class="form-control" name="remark" rows="3" placeholder="可选"></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary">提交打卡</button>
+        <a href="/attendance/list" class="btn btn-secondary">返回</a>
+    </form>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
